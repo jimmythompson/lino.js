@@ -15,9 +15,16 @@ class CommandLine {
 
     private constructor(
         private application: string,
+        private flags: string[] = [],
         private options: Option[] = [],
+        private commandArguments: string[] = [],
         private separator: string = ' '
     ) {}
+
+    public withFlag(flag: string): CommandLine {
+        this.flags.push(flag)
+        return this
+    }
 
     public withOption(key: string, value: string, config: OptionConfig = {}): CommandLine {
         this.options.push({
@@ -33,17 +40,26 @@ class CommandLine {
         return this
     }
 
+    public withArgument(argument: string): CommandLine {
+        this.commandArguments.push(argument)
+        return this
+    }
+
     public toString(): string {
+        const combinedFlags = this.flags.join(' ')
         const combinedOptions = this.options.reduce((acc, next) => {
                 const separator = next.separator || this.separator
                 return [...acc, `${next.key}${separator}${next.value}`]
             },
             []
         ).join(' ')
+        const combinedArguments = this.commandArguments.join(' ')
 
         return [
             this.application,
-            combinedOptions
+            combinedFlags,
+            combinedOptions,
+            combinedArguments
         ]
             .filter(segment => segment.length > 0)
             .join(' ')
@@ -51,13 +67,24 @@ class CommandLine {
 }
 
 describe('CommandLine', () => {
-    describe('toString', () => {
-        test('turns a command into a string', () => {
-            expect(CommandLine.forCommand('node').toString())
-                .toEqual('node')
-        })
+    it('turns a command into a string', () => {
+        expect(CommandLine.forCommand('node').toString())
+            .toEqual('node')
+    })
 
-        test('includes options after the command separated by a space', () => {
+    it('can combine flags options and arguments', () => {
+        let commandLine =
+            CommandLine.forCommand('command-with-options')
+                .withFlag('-v')
+                .withOption('--opt1', 'val1')
+                .withArgument('path/to/file.txt')
+
+        expect(commandLine.toString())
+            .toEqual('command-with-options -v --opt1 val1 path/to/file.txt')
+    })
+
+    describe('withOption', () => {
+        it('includes options after the command separated by a space', () => {
             let commandLine =
                 CommandLine.forCommand('command-with-options')
                     .withOption('--opt1', 'val1')
@@ -67,7 +94,7 @@ describe('CommandLine', () => {
                 .toEqual('command-with-options --opt1 val1 --opt2 val2')
         })
 
-        test('includes options with a custom separator', () => {
+        it('includes options with a custom separator', () => {
             let commandLine =
                 CommandLine.forCommand('command-with-options')
                     .withOptionSeparator('=')
@@ -78,7 +105,7 @@ describe('CommandLine', () => {
                 .toEqual('command-with-options --opt1=val1 --opt2=val2')
         })
 
-        test('includes options with mixed separators', () => {
+        it('includes options with mixed separators', () => {
             let commandLine =
                 CommandLine.forCommand('command-with-options')
                     .withOption('--opt1', 'val1', { separator: '=' })
@@ -88,7 +115,7 @@ describe('CommandLine', () => {
                 .toEqual('command-with-options --opt1=val1 --opt2 val2')
         })
 
-        test('includes options with a custom separator and mixed separators', () => {
+        it('includes options with a custom separator and mixed separators', () => {
             let commandLine =
                 CommandLine.forCommand('command-with-options')
                     .withOptionSeparator('=')
@@ -97,6 +124,29 @@ describe('CommandLine', () => {
 
             expect(commandLine.toString())
                 .toEqual('command-with-options --opt1 val1 --opt2=val2')
+        })
+    })
+
+    describe('withFlag', () => {
+        it('includes flags after the command', () => {
+            let commandLine =
+                CommandLine.forCommand('command-with-options')
+                    .withFlag('--verbose')
+                    .withFlag('-h')
+
+            expect(commandLine.toString())
+                .toEqual('command-with-options --verbose -h')
+        })
+    })
+
+    describe('withArgument', () => {
+        it('includes arguments after the command', () => {
+            let commandLine =
+                CommandLine.forCommand('command-with-options')
+                    .withArgument('path/to/file.txt')
+
+            expect(commandLine.toString())
+                .toEqual('command-with-options path/to/file.txt')
         })
     })
 })
