@@ -75,11 +75,9 @@ export class CommandLine {
     return this;
   }
 
-  public withSubCommand(
-      command: CommandLine
-  ): CommandLine {
-    this.subCommand = command
-    return this
+  public withSubCommand(command: CommandLine): CommandLine {
+    this.subCommand = command;
+    return this;
   }
 
   public toString(): string {
@@ -97,8 +95,8 @@ export class CommandLine {
       .join(" ");
     const combinedArguments = this.commandArguments.join(" ");
     const expandedSubCommand = this.subCommand
-        ? this.subCommand.toString()
-        : "";
+      ? this.subCommand.toString()
+      : "";
 
     return [
       combinedEnvironmentVariables,
