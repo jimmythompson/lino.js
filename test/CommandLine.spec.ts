@@ -1,81 +1,4 @@
-interface Option {
-    key: string
-    value: string
-    separator?: string
-}
-
-interface OptionConfig {
-    separator?: string
-}
-
-class CommandLine {
-    static forCommand(application: string): CommandLine {
-        return new CommandLine(application)
-    }
-
-    private constructor(
-        private application: string,
-        private environmentVariables: Option[] = [],
-        private flags: string[] = [],
-        private options: Option[] = [],
-        private commandArguments: string[] = [],
-        private separator: string = ' '
-    ) {}
-
-    public withEnvironmentVariable(key: string, value: string): CommandLine {
-        this.environmentVariables.push({
-            key,
-            value,
-        })
-        return this
-    }
-
-    public withFlag(flag: string): CommandLine {
-        this.flags.push(flag)
-        return this
-    }
-
-    public withOption(key: string, value: string, config: OptionConfig = {}): CommandLine {
-        this.options.push({
-            key,
-            value,
-            ...(config.separator ? { separator: config.separator } : {})
-        })
-        return this
-    }
-
-    public withOptionSeparator(separator: string): CommandLine {
-        this.separator = separator
-        return this
-    }
-
-    public withArgument(argument: string): CommandLine {
-        this.commandArguments.push(argument)
-        return this
-    }
-
-    public toString(): string {
-        const combinedEnvironmentVariables = this.environmentVariables.reduce((acc, next) => {
-                return [...acc, `${next.key}=${next.value}`]
-            }, []).join(' ')
-        const combinedFlags = this.flags.join(' ')
-        const combinedOptions = this.options.reduce((acc, next) => {
-                const separator = next.separator || this.separator
-                return [...acc, `${next.key}${separator}${next.value}`]
-            }, []).join(' ')
-        const combinedArguments = this.commandArguments.join(' ')
-
-        return [
-            combinedEnvironmentVariables,
-            this.application,
-            combinedFlags,
-            combinedOptions,
-            combinedArguments
-        ]
-            .filter(segment => segment.length > 0)
-            .join(' ')
-    }
-}
+import { CommandLine } from '../src/CommandLine'
 
 describe('CommandLine', () => {
     it('turns a command into a string', () => {
@@ -160,6 +83,15 @@ describe('CommandLine', () => {
             expect(commandLine.toString())
                 .toEqual('command-with-options path/to/file.txt')
         })
+
+        it('wraps in quotes when specified', () => {
+            let commandLine =
+                CommandLine.forCommand('command-with-options')
+                    .withArgument('path/to/file.txt', { wrap: true })
+
+            expect(commandLine.toString())
+                .toEqual('command-with-options "path/to/file.txt"')
+        })
     })
 
     describe('withEnvironmentVariable', () => {
@@ -171,6 +103,29 @@ describe('CommandLine', () => {
 
             expect(commandLine.toString())
                 .toEqual('ENV_VAR1=VAL1 ENV_VAR2=VAL2 command-with-options')
+        })
+    })
+
+    describe('execute', () => {
+        it('executes the command', async () => {
+            let commandLine =
+                CommandLine.forCommand('echo')
+                    .withArgument('Hello, world!', { wrap: true })
+
+            let result = await commandLine.execute()
+
+            expect(result.stdout).toEqual("Hello, world!")
+        })
+
+        it('executes the command', async () => {
+            let commandLine =
+                CommandLine.forCommand('echo')
+                    .withArgument('Hello, world!', { wrap: true })
+                    .withArgument('>&2')
+
+            let result = await commandLine.execute()
+
+            expect(result.stderr).toEqual("Hello, world!")
         })
     })
 })
