@@ -9,6 +9,10 @@
     "test": "jest --forceExit --runInBand",
     "prepublish": "npm run build"
   },
+  "dependencies": {
+    "@babel/polyfill": "^7.6.0",
+    "ramda": "^0.24.1"
+  },
   "devDependencies": {
     "@babel/cli": "^7.6.4",
     "@babel/core": "^7.6.4",
@@ -27,13 +31,22 @@
     "ts-jest": "^24.1.0",
     "typescript": "^3.7.2"
   },
-  "standard": {
+  "eslintConfig": {
+    "rules": {
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": "error"
+    }
+  },
+  "standardx": {
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint/eslint-plugin"
+    ],
     "globals": [
       "describe",
       "it",
       "beforeEach"
-    ],
-    "parser": "babel-eslint"
+    ]
   },
   "jest": {
     "rootDir": "./",
@@ -56,10 +69,6 @@
       "**/test/**/*.spec.ts"
     ],
     "preset": "ts-jest"
-  },
-  "dependencies": {
-    "@babel/polyfill": "^7.6.0",
-    "ramda": "^0.24.1"
   },
   "author": "",
   "license": "ISC"
