@@ -4,7 +4,60 @@
   "description": "A command line builder and runner",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "babel src --out-dir dist",
+    "lint": "standard",
+    "test": "jest --forceExit --runInBand",
+    "prepublish": "npm run build"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.6.4",
+    "@babel/core": "^7.6.4",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@babel/preset-env": "^7.6.3",
+    "@babel/preset-typescript": "^7.7.2",
+    "@babel/register": "^7.6.2",
+    "@types/jest": "^24.0.22",
+    "@types/node": "^12.12.7",
+    "babel-eslint": "^7.2.3",
+    "faker": "^4.1.0",
+    "jest": "^24.9.0",
+    "standard": "^10.0.2",
+    "ts-jest": "^24.1.0",
+    "typescript": "^3.7.2"
+  },
+  "standard": {
+    "globals": [
+      "describe",
+      "it",
+      "beforeEach"
+    ],
+    "parser": "babel-eslint"
+  },
+  "jest": {
+    "rootDir": "./",
+    "testEnvironment": "node",
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts",
+      "tsx"
+    ],
+    "transform": {
+      "^.+\\.(ts|tsx)$": "ts-jest"
+    },
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "tsconfig.json"
+      }
+    },
+    "testMatch": [
+      "**/test/**/*.spec.ts"
+    ],
+    "preset": "ts-jest"
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.6.0",
+    "ramda": "^0.24.1"
   },
   "author": "",
   "license": "ISC"
