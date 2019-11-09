@@ -4,23 +4,16 @@
   "description": "A command line builder and runner",
   "main": "index.js",
   "scripts": {
-    "build": "babel src --out-dir dist",
+    "build": "tsc",
     "lint": "prettier -c **/*.ts",
     "prettify": "prettier --write **/*.ts",
     "test": "jest --forceExit --runInBand",
     "prepublish": "npm run build"
   },
   "dependencies": {
-    "@babel/polyfill": "^7.6.0",
     "ramda": "^0.24.1"
   },
   "devDependencies": {
-    "@babel/cli": "^7.6.4",
-    "@babel/core": "^7.6.4",
-    "@babel/plugin-proposal-class-properties": "^7.5.5",
-    "@babel/preset-env": "^7.6.3",
-    "@babel/preset-typescript": "^7.7.2",
-    "@babel/register": "^7.6.2",
     "@types/jest": "^24.0.22",
     "@types/node": "^12.12.7",
     "faker": "^4.1.0",
