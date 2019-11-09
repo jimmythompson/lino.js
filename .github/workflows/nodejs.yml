@@ -21,6 +21,7 @@ jobs:
       run: |
         npm ci
         npm npm run -s lint
+        npm npm run -s pretty
         npm run -s build --if-present
         npm test
       env:
