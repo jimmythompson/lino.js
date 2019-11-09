@@ -15,11 +15,20 @@ class CommandLine {
 
     private constructor(
         private application: string,
+        private environmentVariables: Option[] = [],
         private flags: string[] = [],
         private options: Option[] = [],
         private commandArguments: string[] = [],
         private separator: string = ' '
     ) {}
+
+    public withEnvironmentVariable(key: string, value: string): CommandLine {
+        this.environmentVariables.push({
+            key,
+            value,
+        })
+        return this
+    }
 
     public withFlag(flag: string): CommandLine {
         this.flags.push(flag)
@@ -46,16 +55,18 @@ class CommandLine {
     }
 
     public toString(): string {
+        const combinedEnvironmentVariables = this.environmentVariables.reduce((acc, next) => {
+                return [...acc, `${next.key}=${next.value}`]
+            }, []).join(' ')
         const combinedFlags = this.flags.join(' ')
         const combinedOptions = this.options.reduce((acc, next) => {
                 const separator = next.separator || this.separator
                 return [...acc, `${next.key}${separator}${next.value}`]
-            },
-            []
-        ).join(' ')
+            }, []).join(' ')
         const combinedArguments = this.commandArguments.join(' ')
 
         return [
+            combinedEnvironmentVariables,
             this.application,
             combinedFlags,
             combinedOptions,
@@ -72,15 +83,16 @@ describe('CommandLine', () => {
             .toEqual('node')
     })
 
-    it('can combine flags options and arguments', () => {
+    it('can assemble complex commands', () => {
         let commandLine =
             CommandLine.forCommand('command-with-options')
+                .withEnvironmentVariable('LOCAL', 'true')
                 .withFlag('-v')
                 .withOption('--opt1', 'val1')
                 .withArgument('path/to/file.txt')
 
         expect(commandLine.toString())
-            .toEqual('command-with-options -v --opt1 val1 path/to/file.txt')
+            .toEqual('LOCAL=true command-with-options -v --opt1 val1 path/to/file.txt')
     })
 
     describe('withOption', () => {
@@ -147,6 +159,18 @@ describe('CommandLine', () => {
 
             expect(commandLine.toString())
                 .toEqual('command-with-options path/to/file.txt')
+        })
+    })
+
+    describe('withEnvironmentVariable', () => {
+        it('includes environment variables before the command', () => {
+            let commandLine =
+                CommandLine.forCommand('command-with-options')
+                    .withEnvironmentVariable('ENV_VAR1', 'VAL1')
+                    .withEnvironmentVariable('ENV_VAR2', 'VAL2')
+
+            expect(commandLine.toString())
+                .toEqual('ENV_VAR1=VAL1 ENV_VAR2=VAL2 command-with-options')
         })
     })
 })
