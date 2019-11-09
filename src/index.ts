@@ -1,5 +1,3 @@
-import { CommandLine } from './CommandLine'
+import { CommandLine } from "./CommandLine";
 
-export {
-    CommandLine
-}
+export { CommandLine };
