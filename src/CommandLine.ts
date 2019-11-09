@@ -30,6 +30,7 @@ export class CommandLine {
     private flags: string[] = [],
     private options: Option[] = [],
     private commandArguments: string[] = [],
+    private subCommand?: CommandLine,
     private separator: string = " "
   ) {}
 
@@ -74,6 +75,13 @@ export class CommandLine {
     return this;
   }
 
+  public withSubCommand(
+      command: CommandLine
+  ): CommandLine {
+    this.subCommand = command
+    return this
+  }
+
   public toString(): string {
     const combinedEnvironmentVariables = this.environmentVariables
       .reduce((acc, next) => {
@@ -88,13 +96,17 @@ export class CommandLine {
       }, [])
       .join(" ");
     const combinedArguments = this.commandArguments.join(" ");
+    const expandedSubCommand = this.subCommand
+        ? this.subCommand.toString()
+        : "";
 
     return [
       combinedEnvironmentVariables,
       this.application,
       combinedFlags,
       combinedOptions,
-      combinedArguments
+      combinedArguments,
+      expandedSubCommand
     ]
       .filter(segment => segment.length > 0)
       .join(" ");

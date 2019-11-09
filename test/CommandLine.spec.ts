@@ -107,8 +107,20 @@ describe("CommandLine", () => {
     });
   });
 
+  describe("withSubCommand", () => {
+    it("unfolds nested commands", () => {
+      const commandLine = CommandLine.forCommand("command")
+        .withSubCommand(CommandLine.forCommand("sub").withFlag("--verbose"))
+        .withOption("--option", "true");
+
+      expect(commandLine.toString()).toEqual(
+        "command --option true sub --verbose"
+      );
+    });
+  });
+
   describe("execute", () => {
-    it("executes the command", async () => {
+    it("returns stdout", async () => {
       const commandLine = CommandLine.forCommand(
         "echo"
       ).withArgument("Hello, world!", { wrap: true });
@@ -118,7 +130,7 @@ describe("CommandLine", () => {
       expect(result.stdout).toEqual("Hello, world!");
     });
 
-    it("executes the command", async () => {
+    it("returns stderr", async () => {
       const commandLine = CommandLine.forCommand("echo")
         .withArgument("Hello, world!", { wrap: true })
         .withArgument(">&2");
